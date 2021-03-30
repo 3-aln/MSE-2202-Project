@@ -264,7 +264,6 @@ void loop()
           {
             ucMotorStateIndex = 1;
             ucMotorState = 0;
-            servoPos=0;
             CR1_ciMotorRunTime=1500;
             move(0);
             break;
@@ -361,8 +360,8 @@ void loop()
           }
           case 9:
           {
-            
-            ENC_SetDistance(350,350);
+            if(CR1_ui8IRDatum==0x55){          //If it sees the beacon, the move forward
+            ENC_SetDistance(150,150);
             ucMotorState = 4;                                 //forward
             CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-30);
             CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-30);
@@ -370,49 +369,66 @@ void loop()
             CR1_ciMotorRunTime=3000;     
             break;
           }
+          else{
+              ci8LeftTurn = 53;                                  //change turning amount to 180
+              ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
+            ucMotorStateIndex = 9;                            // if it sees the beacon, stay in case 9 for the next loop
+            ucMotorState = 3;                                  //turn left 180 if it doesn't see the beacon
+             CR1_ciMotorRunTime=1000;
+           
+            break;
+            }
           
+          }
            case 10:
           {
-            if(CR1_ui8IRDatum==0x41){
+            if(CR1_ui8IRDatum==0x41){                       //if it has hit the beacon, then stop for a moment
             ucMotorStateIndex = 11;
-            ucMotorState = 1;                                //reverse
-            ENC_SetDistance(-350, -350);
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-20);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-20);
+            ucMotorState = 0; 
+            move(0);                               
+            
             break;
           }
           
-          else{
+          else{                                            // if it doesn't hit the beacon then just reverse
          ENC_SetDistance(ci8RightTurn,-(ci8RightTurn));
             CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
             CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
             ucMotorStateIndex =  0;
-            ucMotorState = 2;                       //right
+            ucMotorState = 4;                       //reverse
            
             break;}
             CR1_ciMotorRunTime=3000;
           }
           case 11:
           {
-            ucMotorStateIndex = 12;
-            CR1_ciMotorRunTime=1000;
-            ucMotorState = 0;
-            ci8LeftTurn = 59;
-            move(0);
+            ucMotorStateIndex = 12;           //start climbing the rope
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, HIGH);
+
+            CR1_ciMotorRunTime=17000;            
             break;
           }
           case 12:
           {
-            ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
-            ucMotorStateIndex = 14;
-            ucMotorState = 3;                                  //left
-            CR1_ciMotorRunTime=2000;
+            ucMotorStateIndex = 0;           //stop climbing and change LED colour
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=60000;
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW);
+
+            
+
+            SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.show();
+            
            
             break;
           }
-         case 14:
+        /* case 14:
           {
             ucMotorStateIndex = 0;
             ucMotorState = 0;
@@ -422,7 +438,7 @@ void loop()
             
             break;
           }
-          /*case 6:
+          case 6:
           {
             ucMotorStateIndex = 7;
             ucMotorState = 0;
