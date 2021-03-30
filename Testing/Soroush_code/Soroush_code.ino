@@ -80,7 +80,7 @@ volatile uint32_t vui32test2;
 
 #include <Adafruit_NeoPixel.h>
 #include <Math.h>
-#include "Motion.h";
+#include "Motion_2.h";
 #include "MyWEBserver.h"
 #include "BreakPoint.h"
 #include "WDT.h";
@@ -128,10 +128,11 @@ boolean btToggle = true;
 int iButtonState;
 int iLastButtonState = HIGH;
 
-const int servoPin=15;
-const int servoChannel=7;                            //servo stuff
-int servoPos=0;
-long dutycycle;
+//////////////////////////////////////////////
+int motorINT1=23;                       //variable for the yellow motor
+int motorINT2=15;
+////////////////////////////////////////////////
+
 
 
 // Declare our SK6812 SMART LED object:
@@ -176,8 +177,8 @@ void setup() {
    SmartLEDs.clear();                          // Set all pixel colours to off
    SmartLEDs.show();                           // Send the updated pixel colours to the hardware
 
-   ledcAttachPin(servoPin,servoChannel);        //setting up the servo
-  ledcSetup(servoChannel,50,16);               //50Hz and 16 bit resolution
+   pinMode(motorINT1,OUTPUT);
+   pinMode(motorINT2, OUTPUT);                 //Yellow motor
 }
 
 void loop()
@@ -405,26 +406,16 @@ void loop()
             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
             CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
             CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
-            ucMotorStateIndex = 13;
-            ucMotorState = 3;                                  //left
-             CR1_ciMotorRunTime=2000;
-           
-            break;
-          }
-           case 13:
-          {
             ucMotorStateIndex = 14;
-            ucMotorState = 0;
-            servoPos=90;
-            CR1_ciMotorRunTime=3000;
-            move(0);
+            ucMotorState = 3;                                  //left
+            CR1_ciMotorRunTime=2000;
+           
             break;
           }
          case 14:
           {
             ucMotorStateIndex = 0;
             ucMotorState = 0;
-            servoPos=0;
             CR1_ciMotorRunTime=6000;
             move(0);
             break;                     //stopped
@@ -477,7 +468,7 @@ void loop()
         }
       }
       CR1_ucMainTimerCaseCore1 = 1;
-      ledcWrite(servoChannel,degreestoDutyCycle(servoPos)); //calling the function to change degrees to duty cycle
+      
       break;
     }
     //###############################################################################
@@ -568,7 +559,7 @@ void loop()
 
   }
  }
-//ledcWrite(servoChannel,degreestoDutyCycle(servoPos)); //calling the function to change degrees to duty cycle
+
  // Heartbeat LED
  CR1_ulHeartbeatTimerNow = millis();
  if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatInterval)
@@ -580,11 +571,4 @@ void loop()
  }
  
 
-}
-long degreestoDutyCycle(int deg){
-  const long minDutyCycle=1260;
-  const long maxDutyCycle=7700;
-  dutycycle=map(deg,0,180,minDutyCycle,maxDutyCycle);//cahnging degrees to duty cycle
- 
-  return dutycycle;
 }
