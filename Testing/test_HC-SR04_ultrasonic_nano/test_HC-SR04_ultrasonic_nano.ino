@@ -1,4 +1,4 @@
-// 2021-03-25
+// Testing functionality of HC-SR04 ultrasonic sensor module using Arduino Nano.
 
 // Note: tests performed using Arduino Nano
 
