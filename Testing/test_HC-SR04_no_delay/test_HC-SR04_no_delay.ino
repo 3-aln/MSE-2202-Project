@@ -1,16 +1,18 @@
+#include <NewPing.h>
+
 // Testing functionality of HC-SR04 ultrasonic sensor module using Arduino Nano.
-// Uses micros() to remove use of delay() function.
+// Uses NewPing library to simplify code and improve reading quality.
 
-const int trig_pin = 4;   // HC-SR04 ultrasonic sensor - trigger pin
-const int echo_pin = 3;   // HC-SR04 ultrasonic sensor - "echo" pin
+const int trig_pin = 4;         // HC-SR04 ultrasonic sensor - trigger pin
+const int echo_pin = 3;         // HC-SR04 ultrasonic sensor - "echo" pin
+const int MAX_DISTANCE = 400;   // ultrasonic sensor is rated for around 400 cm
 
-long pulse_duration, dist_cm;
-const int short_pulse = 2;                // microseconds
-const int long_pulse = short_pulse + 10;  // microseconds
+unsigned long ms_now;               // store current operation time in milliseconds
+unsigned long ms_prev_ping;         // previous pulse in milliseconds
 
-unsigned long us_now;               // store current operation time in microseconds
-unsigned long us_prev_short_pulse;  // previous short pulse time
-unsigned long us_prev_long_pulse;   // previous long pulse time
+float distance_cm;        // detected distance using ultrasonic sensor in cm
+
+NewPing sonar(trig_pin, echo_pin, MAX_DISTANCE);  // initialize ultrasonic device
 
 void setup() {
   Serial.begin(9600);
@@ -19,24 +21,12 @@ void setup() {
 }
 
 void loop() {
-  us_now = micros();
+  ms_now = millis();
 
-  if (us_now - us_prev_short_pulse >= short_pulse) {
-    us_prev_short_pulse = us_now;
-    digitalWrite(trig_pin, HIGH);
-  }
-
-  if (us_now - us_prev_long_pulse >= long_pulse) {
-    digitalWrite(trig_pin, LOW);
-
-    pulse_duration = pulseIn(echo_pin, HIGH);
-
-    dist_cm = microsecond_to_cm(pulse_duration);
-    Serial.print(dist_cm);
+  // Every 50 ms, send ping and display distance.
+  if (ms_now - ms_prev_ping >= ping_interval) {
+    distance_cm = sonar.ping_cm();
+    Serial.print(distance_cm);
     Serial.println(" cm");
   }
-}
-
-long microsecond_to_cm(long microseconds) {
-  return (microseconds / 29 / 2);
 }
