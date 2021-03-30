@@ -7,8 +7,9 @@ const int trig_pin = 4;         // HC-SR04 ultrasonic sensor - trigger pin
 const int echo_pin = 3;         // HC-SR04 ultrasonic sensor - "echo" pin
 const int MAX_DISTANCE = 400;   // ultrasonic sensor is rated for around 400 cm
 
-unsigned long ms_now;               // store current operation time in milliseconds
-unsigned long ms_prev_ping;         // previous pulse in milliseconds
+unsigned long ms_now;           // store current operation time in milliseconds
+unsigned long ms_prev_ping;     // previous pulse in milliseconds
+const int ping_interval = 50;   // time between pings in milliseconds
 
 float distance_cm;        // detected distance using ultrasonic sensor in cm
 

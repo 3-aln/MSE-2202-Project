@@ -59,6 +59,11 @@ const int ciSmartLED = 25;
 const int ciStepperMotorDir = 22;
 const int ciStepperMotorStep = 21;
 
+// ------------------------------------------------
+const int US_trig_pin = 21;
+const int US_echo_pin = 33;
+// ------------------------------------------------
+
 volatile uint32_t vui32test1;
 volatile uint32_t vui32test2;
 
@@ -72,6 +77,16 @@ volatile uint32_t vui32test2;
 #include "MyWEBserver.h"
 #include "BreakPoint.h"
 #include "WDT.h";
+
+// ------------------------------------------------------------------------------------------------
+#include <NewPing.h>            // ultrasonic sensor library
+const int MAX_DISTANCE = 400;   // ultrasonic sensor is rated for around 400 cm
+NewPing sonar(US_trig_pin, US_echo_pin, MAX_DISTANCE);    // initialize ultrasonic device
+unsigned long ms_prev_US_ping;            // previous ultrasonic pulse in milliseconds
+const int US_ping_interval = 50;          // time between ultrasonic pings in milliseconds
+float US_distance_cm;           // detected distance using ultrasonic sensor in cm
+// ------------------------------------------------------------------------------------------------
+
 
 void loopWEBServerButtonresponce(void);
 
@@ -436,14 +451,24 @@ void loop()
   }
  }
 
- // Heartbeat LED
- CR1_ulHeartbeatTimerNow = millis();
- if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatInterval)
- {
+  // Heartbeat LED
+  CR1_ulHeartbeatTimerNow = millis();
+  if(CR1_ulHeartbeatTimerNow - CR1_ulHeartbeatTimerPrevious >= CR1_ciHeartbeatInterval)
+  {
     CR1_ulHeartbeatTimerPrevious = CR1_ulHeartbeatTimerNow;
     btHeartbeat = !btHeartbeat;
     digitalWrite(ciHeartbeatLED, btHeartbeat);
    // Serial.println((vui32test2 - vui32test1)* 3 );
- }
+  }
+
+  // Ultrasonic sensor test
+  if (CR1_ulHeartbeatTimerNow - ms_prev_US_ping >= US_ping_interval) {
+    US_distance_cm = sonar.convert_cm(sonar.ping_median(5));
+  
+    Serial.print(US_distance_cm);
+    Serial.println(" cm");
+  }
+
+ 
 
 }
