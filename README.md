@@ -1,6 +1,6 @@
 # MSE-2202-Project
 
-## Installing the `NewPing` Arduino library
+## Installing the `NewPing` Arduino library (for the ultrasonic sensor)
 
 In Arduino IDE: Navigate to `Sketch > Include Library > Add .ZIP Library`. Select the file `NewPing_v1.9.1.zip`, included in the Libraries folder of this repository. The library is now installed.
 
