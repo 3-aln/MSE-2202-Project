@@ -266,6 +266,8 @@ void loop()
             ucMotorState = 0;
             CR1_ciMotorRunTime=1500;
             move(0);
+            SmartLEDs.setPixelColor(1,0,0,0); //turning off the second smart LED that is the climbing indicator
+            SmartLEDs.show();
             break;
           }
            case 1:
@@ -422,7 +424,7 @@ void loop()
 
             
 
-            SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.setPixelColor(1,0,10,50);
             SmartLEDs.show();
             
            
