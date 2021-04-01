@@ -64,13 +64,16 @@ const int ciMotorLeftB = 18;
 const int ciMotorRightA = 19;
 const int ciMotorRightB = 12;
 const int ciEncoderLeftA = 17;
-const int ciEncoderLeftB = 5; /////////////////////////////////////////////////////////////////////// was changed from 5 to 23 for experiment with servo
+const int ciEncoderLeftB = 5; 
 const int ciEncoderRightA = 14;
 const int ciEncoderRightB = 13;
 const int ciSmartLED = 25;
 const int ciStepperMotorDir = 22;
 const int ciStepperMotorStep = 21;
-
+//////////////////////////////////////////////////////////
+const int US_trig_pin = 21;                     //variables for the ultrosonic
+const int US_echo_pin = 33;
+//////////////////////////////////////////////////////////
 volatile uint32_t vui32test1;
 volatile uint32_t vui32test2;
 
@@ -84,6 +87,15 @@ volatile uint32_t vui32test2;
 #include "MyWEBserver.h"
 #include "BreakPoint.h"
 #include "WDT.h";
+
+// ------------------------------------------------------------------------------------------------
+#include <NewPing.h>            // ultrasonic sensor library
+const int MAX_DISTANCE = 400;   // ultrasonic sensor is rated for around 400 cm
+NewPing sonar(US_trig_pin, US_echo_pin, MAX_DISTANCE);    // initialize ultrasonic device
+unsigned long ms_prev_US_ping;            // previous ultrasonic pulse in milliseconds
+const int US_ping_interval = 50;          // time between ultrasonic pings in milliseconds
+float US_distance_cm;           // detected distance using ultrasonic sensor in cm
+// ------------------------------------------------------------------------------------------------
 
 void loopWEBServerButtonresponce(void);
 
@@ -132,6 +144,8 @@ int iLastButtonState = HIGH;
 int motorINT1=23;                       //variable for the yellow motor
 int motorINT2=15;
 ////////////////////////////////////////////////
+
+/////////////////////////////////////////////////
 
 
 
@@ -266,6 +280,8 @@ void loop()
             ucMotorState = 0;
             CR1_ciMotorRunTime=1500;
             move(0);
+            SmartLEDs.setPixelColor(1,0,0,0); //turning off the second smart LED that is the climbing indicator
+            SmartLEDs.show();
             break;
           }
            case 1:
@@ -422,7 +438,7 @@ void loop()
 
             
 
-            SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.setPixelColor(1,0,10,50);
             SmartLEDs.show();
             
            
@@ -585,6 +601,13 @@ void loop()
     digitalWrite(ciHeartbeatLED, btHeartbeat);
    // Serial.println((vui32test2 - vui32test1)* 3 );
  }
+ // Ultrasonic sensor test
+  if (CR1_ulHeartbeatTimerNow - ms_prev_US_ping >= US_ping_interval) {
+    US_distance_cm = sonar.convert_cm(sonar.ping_median(5));
+  
+    Serial.print(US_distance_cm);
+    Serial.println(" cm");
+  }
  
 
 }
