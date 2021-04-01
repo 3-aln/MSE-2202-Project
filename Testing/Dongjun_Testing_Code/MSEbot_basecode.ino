@@ -237,8 +237,10 @@ void loop()
 
  if(!digitalRead(ciLimitSwitch))
  {
-  btRun = 0; //if limit switch is pressed stop bot
-  ucMotorStateIndex = 0;
+
+  //////////////////////////////Reached the top!
+  btRun = 1; 
+  ucMotorStateIndex = 31;
   ucMotorState = 0;
   move(0);
 
@@ -246,10 +248,25 @@ void loop()
    digitalWrite(motorINT2, LOW); 
 
             ledTOP = 1;
-
-            SmartLEDs.setPixelColor(0,25,0,25);
-            SmartLEDs.show();
  }
+
+/////////////////////Purple LED detected after reaching the rope.
+ if(CR1_ui8IRDatum == 0x41){
+
+   //To the climbing.
+   ucMotorStateIndex = 16;
+    ucMotorState = 0;
+    move(0);
+
+    
+
+ }
+
+
+
+
+
+ 
  
  if (Serial2.available() > 0) {               // check for incoming data
     CR1_ui8IRDatum = Serial2.read();          // read the incoming byte
@@ -287,7 +304,7 @@ void loop()
          {
 
 
-///////////////////////////////////////1. First Forward(10~19)
+///////////////////////////////////////Going around Obstacle
 
           //Stop for the moment
           case 0:
@@ -312,7 +329,7 @@ void loop()
               ucMotorState = 3;   //forward
               CR1_ui8LeftWheelSpeed = 140;
               CR1_ui8RightWheelSpeed = 250;
-              CR1_ciMotorRunTime=1000;
+              CR1_ciMotorRunTime=3000;
 
               ucMotorStateIndex = 2;
      
@@ -330,37 +347,385 @@ void loop()
           }
 
 
-        //climbing
-          case 3:
-          {
-            ucMotorStateIndex = 4;
-            digitalWrite(motorINT1, LOW);
-            digitalWrite(motorINT2, HIGH);
+          //Left Turn
 
-            CR1_ciMotorRunTime=17000;            
-            break;
+           case 3:
+          {
+            //Green light
+              ENC_SetDistance(-2*ci8LeftTurn, 2*ci8LeftTurn);
+              CR1_ui8LeftWheelSpeed = 150;
+              CR1_ui8RightWheelSpeed = 150;
+              ucMotorState = 4;  //left
+              CR1_ciMotorRunTime=700;
+
+              ucMotorStateIndex = 4;
+     
+              break;
           }
 
-           //At the top.
+
+          //Stop for the moment
           case 4:
+          {
+            ucMotorStateIndex = 5;
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=1000;            
+            break;
+          }    
+
+          //Move forward
+           case 5:
+          {
+            //Green light
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              CR1_ciMotorRunTime=4000;
+
+              ucMotorStateIndex = 6;
+     
+              break;
+          }
+
+          //Stop for the moment
+          case 6:
+          {
+            ucMotorStateIndex = 7;
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=1000;            
+            break;
+          }          
+
+/////////////Look for the beacon signal from here.
+
+
+
+           case 7:
+          {
+            //Turning left until it sees the green light.
+              ENC_SetDistance(-2*ci8LeftTurn, 2*ci8LeftTurn);
+              CR1_ui8LeftWheelSpeed = 150;
+              CR1_ui8RightWheelSpeed = 150;
+              ucMotorState = 4;  //left
+              CR1_ciMotorRunTime=80;
+
+              ucMotorStateIndex = 8;
+     
+              break;
+          }
+
+          //Stop for the moment (Decide to go forward or look for the beacon)
+          case 8:
+          {
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=100;  
+
+            //Green light: IR signal received
+            if(CR1_ui8IRDatum == 0x55){
+              
+              //Proceed to the next case
+              ucMotorStateIndex = 9; 
+                         
+            }
+            else{
+              //Goes back to turn
+              ucMotorStateIndex = 7; 
+            }
+
+                      
+            break;
+          }  
+
+
+
+////////Move towards the rope
+
+
+          //Move forward
+           case 9:
+          {
+            //Green light
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              CR1_ciMotorRunTime=500;
+
+
+              if(CR1_ui8IRDatum == 0x55){
+              
+              //Proceed to the next case
+              ucMotorStateIndex = 9; 
+                         
+            }
+            else{
+              //Goes back to turn
+              ucMotorStateIndex = 7; 
+            }
+
+              
+     
+              break;
+          }
+
+           
+          
+
+//Could not find the rope!
+          case 100:
           {
             ucMotorStateIndex = 0;
             ucMotorState = 0;
             move(0);
-            CR1_ciMotorRunTime=60000;
-            digitalWrite(motorINT1, LOW);
-            digitalWrite(motorINT2, LOW);
+            CR1_ciMotorRunTime=1000; 
 
-            ledTOP = 1;
+            SmartLEDs.setPixelColor(0,25,0,0);
+            SmartLEDs.setPixelColor(1,25,0,0);
+            SmartLEDs.show();
+
+            btRun = false;
+            break;
+          } 
+
+
+          //Stop for the moment
+          case 15:
+          {
+            ucMotorStateIndex = 16;
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=1000;            
+            break;
+          }    
+
+
+        //climbing
+          case 16:
+          {
+            ucMotorStateIndex = 31;
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, HIGH);
+
+            CR1_ciMotorRunTime=20000;            
+            break;
+          }
+
+
+
+
+
+//Celebration! LEDs flashing!
+          case 31:
+          {
+            ucMotorStateIndex = 32;
+            ucMotorState = 0;
+            move(0);
+
+
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,25,0,0);
+            SmartLEDs.setPixelColor(1,0,25,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+          
+          case 32:
+          {
+            ucMotorStateIndex = 33;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,25,25,0);
+            SmartLEDs.setPixelColor(1,0,25,25);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 33:
+          {
+            ucMotorStateIndex = 34;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,0,25,0);
+            SmartLEDs.setPixelColor(1,0,0,25);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 34:
+          {
+            ucMotorStateIndex = 35;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,0,25,25);
+            SmartLEDs.setPixelColor(1,25,0,25);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 35:
+          {
+            ucMotorStateIndex = 36;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,0,0,25);
+            SmartLEDs.setPixelColor(1,25,0,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 36:
+          {
+            ucMotorStateIndex = 37;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
 
             SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.setPixelColor(1,25,25,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 37:
+          {
+            ucMotorStateIndex = 38;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,25,0,0);
+            SmartLEDs.setPixelColor(1,0,25,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 38:
+          {
+            ucMotorStateIndex = 39;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,25,25,0);
+            SmartLEDs.setPixelColor(1,0,25,25);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 39:
+          {
+            ucMotorStateIndex = 40;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,0,25,0);
+            SmartLEDs.setPixelColor(1,0,0,25);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 40:
+          {
+            ucMotorStateIndex = 41;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=200;
+
+            SmartLEDs.setPixelColor(0,0,25,25);
+            SmartLEDs.setPixelColor(1,25,0,25);
             SmartLEDs.show();
             
             break;
           }
 
 
+          //Standby for 8 extra seconds (LED white for both)
+          case 41:
+          {
+            ucMotorStateIndex = 50;
+            ucMotorState = 0;
+            move(0);
 
+            CR1_ciMotorRunTime=8000;
+
+            SmartLEDs.setPixelColor(0,0,0,0);
+            SmartLEDs.setPixelColor(1,0,0,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+
+          //Climbing down for a bit.
+
+          case 50:
+          {
+            ucMotorStateIndex = 51;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=8000;
+
+            digitalWrite(motorINT1, HIGH);
+            digitalWrite(motorINT2, LOW);
+
+            SmartLEDs.setPixelColor(0,25,0,0);
+            SmartLEDs.setPixelColor(1,25,0,0);
+            SmartLEDs.show();
+            
+            break;
+          }
+
+          case 51:
+          {
+            ucMotorStateIndex = 51;
+            ucMotorState = 0;
+            move(0);
+
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW);
+
+            CR1_ciMotorRunTime=60000;
+
+            SmartLEDs.setPixelColor(0,0,25,25);
+            SmartLEDs.setPixelColor(1,0,25,25);
+            SmartLEDs.show();
+            
+            break;
+          }
 
 
            /////////End of sequences.
