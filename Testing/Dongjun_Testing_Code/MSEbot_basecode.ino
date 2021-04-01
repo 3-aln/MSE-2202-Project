@@ -59,9 +59,6 @@ const int ciSmartLED = 25;
 const int ciStepperMotorDir = 22;
 const int ciStepperMotorStep = 21;
 
-int motorINT1 = 23;   // control pin for motor
-int motorINT2 = 5;    // control pin for motor
-
 volatile uint32_t vui32test1;
 volatile uint32_t vui32test2;
 
@@ -126,16 +123,22 @@ int iLastButtonState = HIGH;
 //////////////////////////////////////////////////////////////
 
 
-int didLeft = 0;
 
-//Servo
+//Motor
 
-const int servoPin = 15;                     
-const int servoChannel = 7;
+int motorINT1 = 23;
+int motorINT2 = 15;                     
 
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
+
+//LED, robot on top?
+int ledTOP = 0;
+
+
+//Limit switch at the front pushed at the top?
+int limTOP = 0;
 
 
 
@@ -185,14 +188,14 @@ void setup() {
    SmartLEDs.show();                           // Send the updated pixel colours to the hardware
 
 
-   //Servo
-  ledcAttachPin(servoPin, servoChannel);
-  ledcSetup(servoChannel, 50, 16);
-  ledcWrite(servoChannel, degreesToDutyCycle(0));
-
+   //yellow motor
   pinMode(motorINT1, OUTPUT);
   pinMode(motorINT2, OUTPUT);
+  
 }
+
+
+
 
 
 
@@ -238,6 +241,14 @@ void loop()
   ucMotorStateIndex = 0;
   ucMotorState = 0;
   move(0);
+
+   digitalWrite(motorINT1, LOW);
+   digitalWrite(motorINT2, LOW); 
+
+            ledTOP = 1;
+
+            SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.show();
  }
  
  if (Serial2.available() > 0) {               // check for incoming data
@@ -282,7 +293,13 @@ void loop()
           case 0:
           {
             ucMotorStateIndex = 1;
-            CR1_ciMotorRunTime=1000;            
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=1000;  
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW);  
+
+            ledTOP = 0;
             break;
           }
 
@@ -290,12 +307,14 @@ void loop()
           //Move forward
            case 1:
           {
-            ucMotorStateIndex = 2;
-              digitalWrite(motorINT1, LOW);
-              digitalWrite(motorINT2, HIGH);
-              CR1_ciMotorRunTime=5000;
+            //Green light
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              CR1_ciMotorRunTime=1000;
 
-              
+              ucMotorStateIndex = 2;
      
               break;
           }
@@ -303,17 +322,48 @@ void loop()
           //Stop for the moment
           case 2:
           {
-            ucMotorStateIndex = 0;
-            CR1_ciMotorRunTime=800; 
-
-            btRun = false;           
+            ucMotorStateIndex = 3;
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=1000;            
             break;
           }
 
 
-          
+        //climbing
+          case 3:
+          {
+            ucMotorStateIndex = 4;
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, HIGH);
+
+            CR1_ciMotorRunTime=17000;            
+            break;
+          }
+
+           //At the top.
+          case 4:
+          {
+            ucMotorStateIndex = 0;
+            ucMotorState = 0;
+            move(0);
+            CR1_ciMotorRunTime=60000;
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW);
+
+            ledTOP = 1;
+
+            SmartLEDs.setPixelColor(0,25,0,25);
+            SmartLEDs.show();
+            
+            break;
+          }
 
 
+
+
+
+           /////////End of sequences.
          }
         }
       }
@@ -378,13 +428,13 @@ void loop()
     //###############################################################################
     case 7: 
     {
-       if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
+       if (CR1_ui8IRDatum == 0x55 && ledTOP == 0) {                // if proper character is seen
          SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
        }
-       else if (CR1_ui8IRDatum == 0x41) {           // if "hit" character is seen
+       else if (CR1_ui8IRDatum == 0x41&& ledTOP == 0) {           // if "hit" character is seen
          SmartLEDs.setPixelColor(0,25,0,25);        // make LED1 purple with 10% intensity
        }
-       else {                                       // otherwise
+       else if(ledTOP == 0){                                       // otherwise
          SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
        }
        SmartLEDs.show();                            // send updated colour to LEDs
