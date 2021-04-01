@@ -137,7 +137,7 @@ int motorINT2 = 15;
 int ledTOP = 0;
 
 
-//Limit switch at the front pushed at the top?
+//Limit switch integer switch so it does not activate the celebration code by accident.
 int limTOP = 0;
 
 
@@ -235,7 +235,7 @@ void loop()
  }
  iLastButtonState = iButtonValue;             // store button state
 
- if(!digitalRead(ciLimitSwitch))
+ if(!digitalRead(ciLimitSwitch) && limTOP == 1)
  {
 
   //////////////////////////////Reached the top!
@@ -255,6 +255,9 @@ void loop()
 
    //To the climbing.
    ucMotorStateIndex = 16;
+
+   //Activating limit switch availability
+   limTOP = 1;
     ucMotorState = 0;
     move(0);
 
