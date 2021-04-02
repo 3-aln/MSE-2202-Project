@@ -253,7 +253,7 @@ void loop()
    ucMotorStateIndex = 16;
 
    //Limit switch starts to work to detect if the robot is at the top of the rope.
-   limTOP = 1;
+   limTop = 1;
     ucMotorState = 0;
     move(0);
  }
@@ -432,7 +432,7 @@ void loop()
             CR1_ciMotorRunTime=1000;
 
             //Recursive until it reaches the top.
-            if (ledTOP == 1){
+            if (ledTop == 1){
               ucMotorStateIndex = 31;
             }
             else{
@@ -606,4 +606,6 @@ void loop()
   }*/
  
 
+
+ }
 }
