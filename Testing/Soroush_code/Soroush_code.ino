@@ -307,13 +307,13 @@ void loop()
            case 1:
           {
             
-            ENC_SetDistance(237,237);
+            ENC_SetDistance(210,210);
             ucMotorState = 4;                                 //forward 1
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-31);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-30);
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-58);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-60);
             ucMotorStateIndex = 2;
-            CR1_ciMotorRunTime=2000;  
-            ci8LeftTurn = 27;     
+            CR1_ciMotorRunTime=1700;  
+            ci8LeftTurn = 23;     
             break;
           }
           //Stop for the moment
@@ -328,8 +328,8 @@ void loop()
           case 3:
           {
             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-90);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-90);
             ucMotorStateIndex = 4;
             ucMotorState = 3;                                  //left 1
             CR1_ciMotorRunTime=700;
@@ -343,19 +343,19 @@ void loop()
             ucMotorState = 0;
             move(0);
             
-            CR1_ciMotorRunTime=1000;   
+            CR1_ciMotorRunTime=500;   
                      
             break;
           }    
           case 5:
           {
             
-            ENC_SetDistance(4000,4000);
+            ENC_SetDistance(295,295);
             ucMotorState = 4;                                 //forward 2
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-30);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-30);
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-70);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-70);
             ucMotorStateIndex = 6;
-            CR1_ciMotorRunTime=4000; 
+            CR1_ciMotorRunTime=2200; 
              ci8RightTurn = 23;    
             break;
           }
@@ -374,11 +374,11 @@ void loop()
            case 7:
           {
             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed);
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-90);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-90);
             ucMotorStateIndex = 8;
             ucMotorState = 3;                                  //left
-            CR1_ciMotorRunTime=80;
+            CR1_ciMotorRunTime=50;
            
             break;
           }
@@ -401,11 +401,11 @@ void loop()
           }
            case 9:
           {
-            ENC_SetDistance(4000,4000);
+            ENC_SetDistance(400,400);
             ucMotorState = 4;                                 //forward 2
-            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-30);
-            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-30);
-            CR1_ciMotorRunTime=500;
+            CR1_ui8LeftWheelSpeed = (CR1_ui8WheelSpeed-83);
+            CR1_ui8RightWheelSpeed = (CR1_ui8WheelSpeed-92);
+            CR1_ciMotorRunTime=200;
 
             //Green light detected, so move forward.
               if(CR1_ui8IRDatum == 0x55){

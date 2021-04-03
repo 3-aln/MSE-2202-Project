@@ -13,7 +13,7 @@
 
 #define DEBUGPRINT 1
 #define ACCELERATIONRATEleft 1
-#define ACCELERATIONRATEright 1.5;
+#define ACCELERATIONRATEright 1
 
 
 
