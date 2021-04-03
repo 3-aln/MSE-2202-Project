@@ -237,8 +237,7 @@ void loop()
 
  if(!digitalRead(ciLimitSwitch) && limTop ==1)
  {
-  btRun = 0; //if limit switch is pressed stop bot
-  ucMotorStateIndex = 0;
+  ucMotorStateIndex = 31;
   ucMotorState = 0;
   move(0);
   //This prevents the LED to change the colors according to the TSOP signal. Instead, it lights up the LEDs to indicate that the robot is at the top.
@@ -556,13 +555,13 @@ void loop()
     //###############################################################################
     case 7: 
     {
-       if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
+       if (CR1_ui8IRDatum == 0x55 && ledTop == 0) {                // if proper character is seen
          SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
        }
-       else if (CR1_ui8IRDatum == 0x41) {           // if "hit" character is seen
+       else if (CR1_ui8IRDatum == 0x41 && ledTop == 0) {           // if "hit" character is seen
          SmartLEDs.setPixelColor(0,25,0,25);        // make LED1 purple with 10% intensity
        }
-       else {                                       // otherwise
+       else if(ledTop == 0) {                                       // otherwise
          SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
        }
        SmartLEDs.show();                            // send updated colour to LEDs
