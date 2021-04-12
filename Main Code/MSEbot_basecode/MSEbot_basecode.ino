@@ -77,7 +77,7 @@ void loopWEBServerButtonresponce(void);
 
 const int CR1_ciMainTimer =  1000;
 const int CR1_ciHeartbeatInterval = 500;
-const int CR1_ciMotorRunTime = 1000;
+int CR1_ciMotorRunTime = 1000;
 const long CR1_clDebounceDelay = 50;
 const long CR1_clReadTimeout = 220;
 
@@ -115,6 +115,25 @@ boolean btRun = false;
 boolean btToggle = true;
 int iButtonState;
 int iLastButtonState = HIGH;
+
+
+//Motor
+
+int motorINT1 = 23;
+int motorINT2 = 15;                     
+
+
+//For LED indicator that the robot is at the top.
+int ledTOP = 0;
+
+
+//Limit switch integer switch so it does not activate the celebration code by accident.
+int limTOP = 0;
+
+
+
+
+
 
 // Declare our SK6812 SMART LED object:
 Adafruit_NeoPixel SmartLEDs(2, 25, NEO_GRB + NEO_KHZ400);
@@ -157,7 +176,18 @@ void setup() {
    SmartLEDs.begin();                          // Initialize Smart LEDs object (required)
    SmartLEDs.clear();                          // Set all pixel colours to off
    SmartLEDs.show();                           // Send the updated pixel colours to the hardware
+
+
+   //yellow motor
+  pinMode(motorINT1, OUTPUT);
+  pinMode(motorINT2, OUTPUT);
+  
 }
+
+
+
+
+
 
 void loop()
 {
@@ -195,13 +225,38 @@ void loop()
  }
  iLastButtonState = iButtonValue;             // store button state
 
- if(!digitalRead(ciLimitSwitch))
+
+  //The robot reached the top! (Door Knob)
+ if(!digitalRead(ciLimitSwitch) && limTOP == 1)
  {
-  btRun = 0; //if limit switch is pressed stop bot
-  ucMotorStateIndex = 0;
+  
+  ucMotorStateIndex = 31;
   ucMotorState = 0;
   move(0);
+
+  //This prevents the LED to change the colors according to the TSOP signal. Instead, it lights up the LEDs to indicate that the robot is at the top.
+  ledTOP = 1;
  }
+
+  //Purple LED detected after reaching the rope. (Beacon's limit switch is pressed.)
+ if(CR1_ui8IRDatum == 0x41){
+
+   //To the climbing case.
+   ucMotorStateIndex = 16;
+
+   //Limit switch starts to work to detect if the robot is at the top of the rope.
+   limTOP = 1;
+    ucMotorState = 0;
+    move(0);
+    
+
+ }
+
+
+
+
+
+ 
  
  if (Serial2.available() > 0) {               // check for incoming data
     CR1_ui8IRDatum = Serial2.read();          // read the incoming byte
@@ -237,109 +292,262 @@ void loop()
          CR1_ulMotorTimerPrevious = CR1_ulMotorTimerNow;
          switch(ucMotorStateIndex)
          {
+
+
+          /*
+           * Going around Obstacle from case 0 to 6
+           */
+          //Stop for the moment
           case 0:
           {
             ucMotorStateIndex = 1;
             ucMotorState = 0;
             move(0);
+            CR1_ciMotorRunTime=1000;  
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW);  
+
+            ledTOP = 0;
             break;
           }
+
+
+          //Move forward
            case 1:
           {
-            
-            ENC_SetDistance(200, 200);
-            ucMotorState = 1;   //forward
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
-            ucMotorStateIndex = 2;
-                     
-            break;
+            //Green light
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              CR1_ciMotorRunTime=3000;
+
+              ucMotorStateIndex = 2;
+     
+              break;
           }
-           case 2:
+
+          //Stop for the moment
+          case 2:
           {
             ucMotorStateIndex = 3;
             ucMotorState = 0;
             move(0);
+            CR1_ciMotorRunTime=1000;            
             break;
           }
-          case 3:
+
+
+          //Left Turn
+           case 3:
           {
-            ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
-            ucMotorStateIndex = 4;
-            ucMotorState = 2;  //left
-           
-            break;
+              ENC_SetDistance(-2*ci8LeftTurn, 2*ci8LeftTurn);
+              CR1_ui8LeftWheelSpeed = 150;
+              CR1_ui8RightWheelSpeed = 150;
+              ucMotorState = 4;  //left
+              
+              CR1_ciMotorRunTime=700;
+              ucMotorStateIndex = 4;
+     
+              break;
           }
-           case 4:
+
+
+          //Stop for the moment
+          case 4:
           {
             ucMotorStateIndex = 5;
             ucMotorState = 0;
             move(0);
-            break;
-          }
-         case 5:
-          {
-            ENC_SetDistance(ci8RightTurn,-(ci8RightTurn));
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
-            ucMotorStateIndex =  6;
-            ucMotorState = 3;  //right
             
+            CR1_ciMotorRunTime=1000;   
+                     
             break;
+          }    
+
+          //Move forward
+           case 5:
+          {
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              
+              CR1_ciMotorRunTime=4000;
+
+              ucMotorStateIndex = 6;
+     
+              break;
           }
+
+          //Stop for the moment
           case 6:
           {
             ucMotorStateIndex = 7;
             ucMotorState = 0;
             move(0);
+            CR1_ciMotorRunTime=1000;            
             break;
-          }
+          }          
+
+
+
+
+          /*
+           * Look for the beacon signal from case 7 to case 9.
+           */
            case 7:
           {
-            ucMotorStateIndex = 8;
-            ucMotorState = 4;  //reverse
-            ENC_SetDistance(-200, -200);
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
-            
-            break;
+            //Turning left until it sees the green light.
+              ENC_SetDistance(-2*ci8LeftTurn, 2*ci8LeftTurn);
+              CR1_ui8LeftWheelSpeed = 150;
+              CR1_ui8RightWheelSpeed = 150;
+              ucMotorState = 4;  //left
+              CR1_ciMotorRunTime=80;
+
+              ucMotorStateIndex = 8;
+     
+              break;
           }
+
+          //Stop for the moment (Decide to go forward or look for the beacon)
           case 8:
           {
-            ucMotorStateIndex = 9;
             ucMotorState = 0;
             move(0);
+            CR1_ciMotorRunTime=100;  
+
+            //Green light: IR signal received
+            if(CR1_ui8IRDatum == 0x55){
+              
+              //Proceed to the next case
+              ucMotorStateIndex = 9; 
+                         
+            }
+            else{
+              //Goes back to turn
+              ucMotorStateIndex = 7; 
+            }
+            
+            break;
+            
+          }  
+
+
+
+
+
+          //Move forward
+           case 9:
+          {
+              ENC_SetDistance(4000, 4000);
+              ucMotorState = 3;   //forward
+              CR1_ui8LeftWheelSpeed = 140;
+              CR1_ui8RightWheelSpeed = 250;
+              CR1_ciMotorRunTime=500;
+
+
+             //Green light detected, so move forward.
+              if(CR1_ui8IRDatum == 0x55){
+              
+              //Proceed to the next case
+              ucMotorStateIndex = 9; 
+                         
+            }
+            
+            else{
+              //Goes back to turning left
+              ucMotorStateIndex = 7; 
+            }
+
+              break;
+          }   
+
+
+          /*
+           * Case 16 starts when the beacon limmit switch is pressed. (Purple LED)
+           * climbing and checking if the limit switch is pressed every 1 sec.
+           */
+          case 16:
+          {
+            
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, HIGH);
+
+            CR1_ciMotorRunTime=1000;
+
+            //Recursive until it reaches the top.
+            if (ledTOP == 1){
+              ucMotorStateIndex = 31;
+            }
+            else{
+            ucMotorStateIndex = 16;              
+            }
+
+
             break;
           }
-          case 9:
+
+
+
+
+
+          //LED Changing Color after the wait time.
+          case 31:
           {
-            ENC_SetDistance(ci8RightTurn,-(ci8RightTurn));
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
-            ucMotorStateIndex = 10;
-            ucMotorState = 3;  //right
+
+            //Motor keeps running to maintain its position at the top. (Continues from Case 16)
+            
+            ucMotorStateIndex = 32;
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=5000;
+
+            SmartLEDs.setPixelColor(0,25,0,0);           
+            SmartLEDs.show();
             
             break;
           }
-          case 10:
+
+
+
+          
+          case 32:
           {
-            ucMotorStateIndex = 11;
+            ucMotorStateIndex = 33;
             ucMotorState = 0;
             move(0);
+
+            CR1_ciMotorRunTime=60000;
+
+            //LEDs light up to indicate that the sequence is over.
+            SmartLEDs.setPixelColor(0,25,0,0);
+            SmartLEDs.setPixelColor(1,0,25,0);
+            SmartLEDs.show();
+
+            digitalWrite(motorINT1, LOW);
+            digitalWrite(motorINT2, LOW); 
+            
             break;
           }
-           case 11:
+
+
+          //Button reset, end of the sequence.
+          case 33:
           {
-             ENC_SetDistance(-(ci8LeftTurn), ci8LeftTurn);
-            CR1_ui8LeftWheelSpeed = CR1_ui8WheelSpeed;
-            CR1_ui8RightWheelSpeed = CR1_ui8WheelSpeed;
             ucMotorStateIndex = 0;
-            ucMotorState = 2;  //left
+            ucMotorState = 0;
+            move(0);
+
+            CR1_ciMotorRunTime=60000;
+
+            btRun = false;
             
             break;
           }
+          
+           /////////End of sequences.
          }
         }
       }
@@ -404,13 +612,15 @@ void loop()
     //###############################################################################
     case 7: 
     {
-       if (CR1_ui8IRDatum == 0x55) {                // if proper character is seen
+
+      //The change on color of LED is deactivated once it reaches the top of the rope to light up the indicating lights that the robot is at the top.
+       if (CR1_ui8IRDatum == 0x55 && ledTOP == 0) {                // if proper character is seen
          SmartLEDs.setPixelColor(0,0,25,0);         // make LED1 green with 10% intensity
        }
-       else if (CR1_ui8IRDatum == 0x41) {           // if "hit" character is seen
+       else if (CR1_ui8IRDatum == 0x41&& ledTOP == 0) {           // if "hit" character is seen
          SmartLEDs.setPixelColor(0,25,0,25);        // make LED1 purple with 10% intensity
        }
-       else {                                       // otherwise
+       else if(ledTOP == 0){                                       // otherwise
          SmartLEDs.setPixelColor(0,25,0,0);         // make LED1 red with 10% intensity
        }
        SmartLEDs.show();                            // send updated colour to LEDs
