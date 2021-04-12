@@ -1,7 +1,6 @@
 /*
  Western Engineering base code
 2020 05 13 E J Porter
-
  Dual Motor driver controller implement
   
  */
