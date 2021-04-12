@@ -225,11 +225,10 @@ void loop()
  }
  iLastButtonState = iButtonValue;             // store button state
 
-
   //The robot reached the top! (Door Knob)
- if(!digitalRead(ciLimitSwitch) && limTOP == 1)
+ if(digitalRead(ciLimitSwitch) && limTOP == 1)
  {
-  
+  Serial.println("activate");
   ucMotorStateIndex = 31;
   ucMotorState = 0;
   move(0);
@@ -300,7 +299,7 @@ void loop()
           //Stop for the moment
           case 0:
           {
-            ucMotorStateIndex = 1;
+            ucMotorStateIndex = 7;
             ucMotorState = 0;
             move(0);
             CR1_ciMotorRunTime=1000;  
@@ -318,9 +317,9 @@ void loop()
             //Green light
               ENC_SetDistance(4000, 4000);
               ucMotorState = 3;   //forward
-              CR1_ui8LeftWheelSpeed = 140;
-              CR1_ui8RightWheelSpeed = 250;
-              CR1_ciMotorRunTime=3000;
+              CR1_ui8LeftWheelSpeed = 140;    //  140  150
+              CR1_ui8RightWheelSpeed = 240;   //   250   30
+              CR1_ciMotorRunTime=4000;        // 3000
 
               ucMotorStateIndex = 2;
      
@@ -346,7 +345,7 @@ void loop()
               CR1_ui8RightWheelSpeed = 150;
               ucMotorState = 4;  //left
               
-              CR1_ciMotorRunTime=700;
+              CR1_ciMotorRunTime=350;    // O: 700
               ucMotorStateIndex = 4;
      
               break;
@@ -371,9 +370,9 @@ void loop()
               ENC_SetDistance(4000, 4000);
               ucMotorState = 3;   //forward
               CR1_ui8LeftWheelSpeed = 140;
-              CR1_ui8RightWheelSpeed = 250;
+              CR1_ui8RightWheelSpeed = 240;
               
-              CR1_ciMotorRunTime=4000;
+              CR1_ciMotorRunTime=4750;      // 4000
 
               ucMotorStateIndex = 6;
      
@@ -400,10 +399,10 @@ void loop()
           {
             //Turning left until it sees the green light.
               ENC_SetDistance(-2*ci8LeftTurn, 2*ci8LeftTurn);
-              CR1_ui8LeftWheelSpeed = 150;
-              CR1_ui8RightWheelSpeed = 150;
+              CR1_ui8LeftWheelSpeed = 170;    // 150
+              CR1_ui8RightWheelSpeed = 170;   // 150
               ucMotorState = 4;  //left
-              CR1_ciMotorRunTime=80;
+              CR1_ciMotorRunTime=80;          // 80
 
               ucMotorStateIndex = 8;
      
@@ -442,8 +441,8 @@ void loop()
           {
               ENC_SetDistance(4000, 4000);
               ucMotorState = 3;   //forward
-              CR1_ui8LeftWheelSpeed = 140;
-              CR1_ui8RightWheelSpeed = 250;
+              CR1_ui8LeftWheelSpeed = 190;    // 140  // 180 alright
+              CR1_ui8RightWheelSpeed = 160;   // 240  // 180
               CR1_ciMotorRunTime=500;
 
 
