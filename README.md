@@ -1,4 +1,4 @@
-# MSE 2202 Project Final Project - Code Repository
+# MSE 2202 Final Project - Code Repository
 ## Lab 004 Team 2
 Allen Sun
 
