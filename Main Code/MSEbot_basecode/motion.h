@@ -12,14 +12,16 @@
 //---------------------------------------------------------------------------
 
 #define DEBUGPRINT 1
-#define ACCELERATIONRATE 1;
+#define ACCELERATIONRATEleft 1
+#define ACCELERATIONRATEright 1
+
 
 
 
 unsigned char ucMotion_Direction;
 unsigned char ucMotion_Speed;
 
-const uint8_t cui8StartingSpeed = 140;
+const uint8_t cui8StartingSpeed = 150;
 
 uint8_t ui8LeftWorkingSpeed = cui8StartingSpeed;
 uint8_t ui8RightWorkingSpeed = cui8StartingSpeed;
@@ -34,7 +36,7 @@ double dRightSpeed;
 
 void setupMotion (void)
 {
-	
+  
   dManualSpeed = 0;
   dForwardSpeed = 250;  // max 255; min ~150 before motor stall
   dReverseSpeed = 250;
@@ -54,7 +56,7 @@ void setupMotion (void)
   ledcSetup(2, 20000, 8);
   ledcSetup(3, 20000, 8);
   ledcSetup(4, 20000, 8);
- 	
+  
    ucMotion_Direction = 0;
    ucMotion_Speed = 0;
 }
@@ -87,7 +89,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATEleft;
           }
           if(ui8RightWorkingSpeed >= ui8RightSpeed)
           {
@@ -95,7 +97,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATEright;
           }
           
           ledcWrite(2,0);
@@ -114,7 +116,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATEleft;
           }
           if(ui8RightWorkingSpeed >= ui8RightSpeed)
           {
@@ -122,7 +124,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATEright;
           }
          
           ledcWrite(1,0);
@@ -141,7 +143,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATEleft;
           }
           if(ui8RightWorkingSpeed >= ui8RightSpeed)
           {
@@ -149,7 +151,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATEright;
           }
          
           ledcWrite(2,0);
@@ -169,7 +171,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATE;
+          ui8LeftWorkingSpeed = ui8LeftWorkingSpeed + ACCELERATIONRATEleft;
           }
           if(ui8RightWorkingSpeed >= ui8RightSpeed)
           {
@@ -177,7 +179,7 @@ void MoveTo(uint8_t ui8Direction, uint8_t ui8LeftSpeed, uint8_t ui8RightSpeed)
           }
           else
           {
-            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATE;
+            ui8RightWorkingSpeed = ui8RightWorkingSpeed + ACCELERATIONRATEright;
           }
          
           ledcWrite(1,0);
@@ -218,7 +220,7 @@ void move(uint8_t ui8Speed)
           break;
         }
       
-        //Forward
+        //Reverse
         case 1:
         {
           //ui8speed = dForwardSpeed;
@@ -237,7 +239,7 @@ void move(uint8_t ui8Speed)
          #endif   
           break;
         }
-        //Left
+        //Right
         case 2:
         {
           ui8Speed = dLeftSpeed;
@@ -256,7 +258,7 @@ void move(uint8_t ui8Speed)
          #endif 
           break;
         }
-        //Right
+        //Left
         case 3:
         {
           ui8Speed = dRightSpeed;
@@ -275,7 +277,7 @@ void move(uint8_t ui8Speed)
          #endif   
           break;
         }
-        //Reverse
+        //Forwards
         case 4:
         {
           // ui8speed = dReverseSpeed;
